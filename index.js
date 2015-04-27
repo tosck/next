@@ -54,6 +54,7 @@ function request(url, options, callback) {
 
   if (options.opts.method !== 'GET') {
     url = options.requestOptions
+    url.method = options.opts.method;
   }
 
   req = req.request(url, function(res) {

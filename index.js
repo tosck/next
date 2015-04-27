@@ -33,8 +33,34 @@ function tosck(url, opts, callback) {
   argz = validateArguments(argz.url, argz.opts, argz.callback);
   argz = normalizeArguments(argz.url, argz.opts, argz.callback);
 
+  var options = {
+    opts: argz.opts,
+    requestOptions: argz.requestOptions
+  };
+  request(argz.requestUrl, options, function(err, res) {
+    if (err) {
+      errors('[tosck] request error', err);
+      return;
+    }
 
-  console.log(JSON.stringify(argz, 0, 2))
+    // read `res`
+  });
+
+  console.log(JSON.stringify(argz, 0, 2));
+}
+
+function request(url, options, callback) {
+  var req = options.requestOptions.protocol === 'https:' ? https : http;
+
+  if (options.opts.method !== 'GET') {
+    url = options.requestOptions
+  }
+
+  req = req.request(url, function(res) {
+    callback(null, res)
+  });
+  req.on('error', callback);
+  req.end(options.opts.body || undefined)
 }
 
 /**

@@ -60,7 +60,7 @@ function request(url, options, callback) {
   req = req.request(url, function(res) {
     callback(null, res)
   });
-  req.on('error', callback);
+  req.once('error', callback);
   req.end(options.opts.body || undefined)
 }
 

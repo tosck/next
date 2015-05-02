@@ -10,6 +10,6 @@
 var test = require('assertit');
 var tosck = require('./index');
 
-test('tosck:', function() {
-  test.assert.ok(true)
-});
+// test('tosck:', function() {
+//   test.assert.ok(true)
+// });

@@ -16,6 +16,7 @@ var resolveUrl = require('url').resolve;
 var formatUrl = require('url').format;
 var parseUrl = require('url').parse;
 var errors = require('http-errors');
+var abbrev = require('map-types');
 var kindOf = require('kind-of');
 var omit = require('object.omit');
 var https = require('https');
@@ -24,8 +25,8 @@ var zlib = require('zlib');
 var util = require('util');
 var qs = require('qs');
 
-var fullUrl = 'https://user:pass@github.com/foo/damn?foo=bar&baz[0]=qux&baz[1]=jax&cat=123&a[b]=c#users=hash';
-tosck(fullUrl, {query: {aaaa: {bbb: 'ccc'}}, path: '/cat/meow?foo=dog', maxRedirects: 12})
+// var fullUrl = 'https://user:pass@github.com/foo/damn?foo=bar&baz[0]=qux&baz[1]=jax&cat=123&a[b]=c#users=hash';
+// tosck(fullUrl, {query: {aaaa: {bbb: 'ccc'}, path: '/cat/meow?foo=dog', maxRedirects: 12})
 
 function tosck(url, opts, callback) {
   var argz = handleArguments(arguments);
@@ -108,35 +109,52 @@ function validateArguments(url, opts, callback) {
  * @api private
  */
 function validateOptions(opts) {
-  if (opts.query && kindOf(opts.query) !== 'string' && kindOf(opts.query) !== 'object') {
-    throw new TypeError('[tosck] opts.query should be string or object');
-  }
-  if (opts.path && kindOf(opts.path) !== 'string') {
-    throw new TypeError('[tosck] opts.path should be string');
-  }
-  if (opts.pathname && kindOf(opts.pathname) !== 'string') {
-    throw new TypeError('[tosck] opts.pathname should be string');
-  }
-  if (opts.host && kindOf(opts.host) !== 'string') {
-    throw new TypeError('[tosck] opts.host should be string');
-  }
-  if (opts.hostname && kindOf(opts.hostname) !== 'string') {
-    throw new TypeError('[tosck] opts.hostname should be string');
-  }
-  if (opts.timeout && kindOf(opts.timeout) !== 'number') {
-    throw new TypeError('[tosck] opts.timeout should be number');
-  }
-  if (opts.socketTimeout && kindOf(opts.socketTimeout) !== 'number') {
-    throw new TypeError('[tosck] opts.socketTimeout should be number');
-  }
-  if (opts.maxRedirects && kindOf(opts.maxRedirects) !== 'number') {
-    throw new TypeError('[tosck] opts.maxRedirects should be number');
-  }
-  if (opts.followRedirects && kindOf(opts.followRedirects) !== 'boolean') {
-    throw new TypeError('[tosck] opts.followRedirects should be boolean');
+  var map = {
+    query: 'so',
+    path: 's',
+    pathname: 's',
+    host: 's',
+    hostname: 's',
+    timeout: 'n',
+    socketTimeout: 'n',
+    maxRedirects: 'n',
+    followRedirects: 'b'
+  };
+  Object.keys(map).forEach(function(prop) {
+    delegateError(opts[prop], map[prop], '[tosck] opts.' + prop);
+  })
+  return opts;
+}
+var abbrev = require('map-types');
+var kindOf = require('kind-of');
+
+function abbrevKindof(val, type) {
+  var abbrs = abbrev(type);
+  var len = abbrs.length;
+  var i = -1;
+
+  if (len <= 1) {
+    type = abbrs[0];
+    return !(val && kindOf(val) !== type);
   }
 
-  return opts;
+  while (i < len) {
+    i = i+1;
+    type = abbrs[i];
+    var next = abbrs[i+1];
+    if (next) {
+      return !(val && kindOf(val) !== type && kindOf(val) !== next);
+    }
+    return !(val && kindOf(val) !== type);
+  }
+}
+
+function delegateError(value, abbr, message) {
+  if (abbrevKindof(value, abbr)) {
+    return;
+  }
+  var types = abbrev(abbr).join(' or ');
+  throw new TypeError(message + ' should be ' + types);
 }
 
 /**

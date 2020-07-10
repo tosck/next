@@ -38,6 +38,6 @@
     "lowercase-keys": "^1.0.0",
     "object.omit": "^1.1.0",
     "prepend-http": "^1.0.1",
-    "qs": "^2.4.1"
+    "qs": "^6.9.4"
   }
 }
